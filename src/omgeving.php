@@ -111,11 +111,16 @@ function studiosambal_env_type()
  * ------------------------------------------------------------------------- */
 
 /**
+* Crawlen toestaan, zodat zoekmachines de noindex (meta en X-Robots-Tag) kunnen
+* lezen. Met 'Disallow: /' zien ze die niet en kan een gelinkte URL alsnog in
+* de resultaten komen. WordPress zelf zet 'Disallow: /' zodra blog_public 0 is,
+* daarom wordt de hele robots.txt vervangen.
+*
 * @return string
 */
 function studiosambal_env_robots_txt()
 {
-   return "User-agent: *\nDisallow: /\n";
+   return "User-agent: *\nDisallow:\n";
 }
 
 /**
@@ -211,6 +216,10 @@ function studiosambal_env_production_notice()
 function studiosambal_env_admin_bar( $admin_bar )
 {
    $environment = studiosambal_env_type();
+   // Productie krijgt geen label, behalve als waarschuwing bij 'Zoekmachines ontmoedigen'.
+   if ( 'production' === $environment && ! studiosambal_env_production_hidden() ) {
+      return;
+   }
    $labels = array(
       'local'       => 'Lokaal',
       'development' => 'Development',
@@ -223,7 +232,7 @@ function studiosambal_env_admin_bar( $admin_bar )
       'title' => esc_html( $label ),
       'meta'  => array(
          'class' => 'studiosambal-env studiosambal-env--' . sanitize_html_class( $environment ),
-         'title' => 'production' === $environment ? 'Live website' : 'Zoekmachines geblokkeerd door Studio Sambal',
+         'title' => 'Zoekmachines ontmoedigd door Studio Sambal',
       ),
    );
    if ( studiosambal_env_production_hidden() ) {
@@ -245,7 +254,6 @@ function studiosambal_env_admin_bar_style()
       . '#wpadminbar .studiosambal-env > .ab-item{color:#fff!important;font-weight:600;background:#c62828!important}'
       . '#wpadminbar .studiosambal-env--local > .ab-item{background:#2e7d32!important}'
       . '#wpadminbar .studiosambal-env--development > .ab-item,#wpadminbar .studiosambal-env--staging > .ab-item{background:#e65100!important}'
-      . '#wpadminbar .studiosambal-env--production > .ab-item{background:transparent!important;color:#f0f0f1!important;font-weight:400}'
       . '#wpadminbar .studiosambal-env--hidden > .ab-item{background:#c62828!important;color:#fff!important;font-weight:600}'
       . '@media screen and (max-width:782px){#wpadminbar li.studiosambal-env{display:block}#wpadminbar .studiosambal-env > .ab-item{font-size:13px;padding:0 8px}}'
       . '</style>';

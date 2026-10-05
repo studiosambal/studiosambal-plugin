@@ -151,7 +151,7 @@ foreach ( array(
    check( $blocked ? 0 : false, apply_filters( 'pre_option_blog_public', false ), 'Runtime privacy' );
    check( 'local' === $expected && 'valid' === $mode, false !== has_filter( 'wp_get_attachment_url' ), 'Upload hooks' );
    if ( $blocked ) {
-      check( "User-agent: *\nDisallow: /\n", apply_filters( 'robots_txt', 'Allow: /' ), 'robots.txt' );
+      check( "User-agent: *\nDisallow:\n", apply_filters( 'robots_txt', "User-agent: *\nDisallow: /\n" ), 'robots.txt laat crawlen toe (noindex leesbaar)' );
       check( array( 'noindex' => true, 'nofollow' => true, 'nosnippet' => true, 'noarchive' => true ),
          apply_filters( 'wp_robots', array( 'index' => true, 'follow' => true, 'max-image-preview' => 'large' ) ), 'Core robots' );
       $robots = apply_filters( 'rank_math/frontend/robots', array( 'index' => 'index', 'follow' => 'follow' ) );
@@ -163,7 +163,7 @@ foreach ( array(
 // Productie: waarschuwing en adminbalk bij 'Zoekmachines ontmoedigen'.
 foreach ( array(
    array( 'production', 'https://example.org', '0', true, 'Productie · niet indexeerbaar', 'studiosambal-env--production studiosambal-env--hidden' ),
-   array( 'production', 'https://example.org', '1', false, 'Productie', 'studiosambal-env--production' ),
+   array( 'production', 'https://example.org', '1', false, null, null ),
    array( 'staging', 'https://example.org', '0', false, 'Staging', 'studiosambal-env--staging' ),
    array( 'production', 'https://demo.flywp.xyz', '0', false, 'Staging', 'studiosambal-env--staging' ),
    array( 'local', 'https://example.test', '1', false, 'Lokaal', 'studiosambal-env--local' ),
@@ -183,7 +183,7 @@ foreach ( array(
    $bar = new Fake_Admin_Bar();
    studiosambal_env_admin_bar( $bar );
    check( $label, $bar->nodes['studiosambal-env']['title'] ?? null, 'Admin bar label' );
-   check( 'studiosambal-env ' . $class, $bar->nodes['studiosambal-env']['meta']['class'] ?? null, 'Admin bar class' );
+   check( null === $class ? null : 'studiosambal-env ' . $class, $bar->nodes['studiosambal-env']['meta']['class'] ?? null, 'Admin bar class' );
    check( $hidden, isset( $bar->nodes['studiosambal-env']['href'] ), 'Admin bar link' );
 }
 $blog_public = '1';

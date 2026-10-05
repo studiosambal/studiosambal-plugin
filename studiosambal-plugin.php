@@ -2,7 +2,7 @@
 /**
 * Plugin Name: Studio Sambal
 * Plugin URI: https://github.com/studiosambal/studiosambal-plugin
-* Description: Omgevingsgedrag op één plek. Niet-productie: zoekmachine-indexering geblokkeerd. Productie: waarschuwing als zoekmachines ontmoedigd worden. Overal: omgevingslabel in de adminbalk. Lokaal: ontbrekende uploads (ook SVG's die Bricks van schijf leest) worden van de externe omgeving geladen. Wordt via een mu-loader altijd geladen, ook als hij gedeactiveerd is.
+* Description: De Studio Sambal-plugin voor de sites die wij bouwen en beheren. Houdt test- en lokale omgevingen uit Google, laat in de adminbalk zien als je níet op de live site werkt en haalt lokaal ontbrekende afbeeldingen van de live site.
 * Version: 3.3.2
 * Requires PHP: 7.4
 * Author: Studio Sambal

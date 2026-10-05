@@ -2,9 +2,9 @@
 
 WordPress-plugin met omgevingsgedrag op één plek:
 
-- **Niet-productie** (lokaal, staging, FlyWP-testdomeinen): zoekmachines ontmoedigd via robots.txt, meta robots, Rank Math en `X-Robots-Tag`. Dit is geen afscherming: statische bestanden en serverside caches die PHP overslaan vallen erbuiten. Echt afschermen doe je met toegangsbeveiliging op de server.
+- **Niet-productie** (lokaal, staging, FlyWP-testdomeinen): `noindex` via meta robots, Rank Math en de `X-Robots-Tag`-header. robots.txt staat crawlen bewust toe, anders kan Google die `noindex` niet lezen. Dit is geen afscherming: statische bestanden en serverside caches die PHP overslaan vallen erbuiten. Echt afschermen doe je met toegangsbeveiliging op de server.
 - **Productie:** waarschuwing als "Zoekmachines ontmoedigen" aanstaat.
-- **Overal:** omgevingslabel in de adminbalk.
+- **Adminbalk:** label met de omgeving (Lokaal, Staging, Development). Productie krijgt geen label, behalve een rode waarschuwing als "Zoekmachines ontmoedigen" aanstaat.
 - **Lokaal:** ontbrekende uploads komen van de externe omgeving. Gewone bestanden via een URL-rewrite of redirect, SVG's (die Bricks van schijf leest) worden één keer gedownload.
 
 ## Installeren op een site
