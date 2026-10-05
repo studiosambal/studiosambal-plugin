@@ -1,0 +1,13 @@
+{
+    "name": "studiosambal/studiosambal-plugin",
+    "type": "wordpress-plugin",
+    "authors": [
+        {
+            "name": "Studio Sambal",
+            "email": "patrick@studiosambal.nl"
+        }
+    ],
+    "require": {
+        "yahnis-elsts/plugin-update-checker": "^5"
+    }
+}
