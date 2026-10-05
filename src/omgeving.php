@@ -326,9 +326,27 @@ function studiosambal_env_remote_uploads_base()
 function studiosambal_env_remote_image_src( $image )
 {
    if ( ! empty( $image[0] ) ) {
-      $image[0] = studiosambal_env_remote_upload_url( $image[0] );
+      $image[0] = studiosambal_env_remote_upload_url( studiosambal_env_local_upload_url( $image[0] ) );
    }
    return $image;
+}
+
+/**
+* Zet een externe upload-URL terug naar de lokale. WordPress bouwt een
+* formaat (thumbnail) op de URL van het origineel; ontbreekt alleen het
+* origineel lokaal, dan is die URL al extern terwijl het formaat lokaal
+* kan bestaan. Daarna beslist studiosambal_env_remote_upload_url() opnieuw.
+*
+* @param string $url
+* @return string
+*/
+function studiosambal_env_local_upload_url( $url )
+{
+   $remote = studiosambal_env_remote_uploads_base();
+   if ( ! is_string( $url ) || '' === $remote || 0 !== strpos( $url, $remote . '/' ) ) {
+      return $url;
+   }
+   return untrailingslashit( wp_get_upload_dir()['baseurl'] ?? '' ) . substr( $url, strlen( $remote ) );
 }
 
 /**
@@ -339,7 +357,7 @@ function studiosambal_env_remote_srcset( $sources )
 {
    foreach ( (array) $sources as $key => $source ) {
       if ( ! empty( $source['url'] ) ) {
-         $sources[ $key ]['url'] = studiosambal_env_remote_upload_url( $source['url'] );
+         $sources[ $key ]['url'] = studiosambal_env_remote_upload_url( studiosambal_env_local_upload_url( $source['url'] ) );
       }
    }
    return $sources;
@@ -369,6 +387,9 @@ function studiosambal_env_missing_upload_redirect_target()
    $target = studiosambal_env_remote_upload_url( $local );
    return $target === $local ? '' : $target;
 }
+
+/** Grotere SVG's worden niet gedownload; een logo of icoon is een paar KB. */
+define( 'STUDIOSAMBAL_SVG_MAX_BYTES', 1024 * 1024 );
 
 /**
 * Haalt een lokaal ontbrekende SVG-bijlage één keer van de externe omgeving
@@ -406,15 +427,44 @@ function studiosambal_env_fetch_missing_svg( $file, $attachment_id )
    }
 
    $url = studiosambal_env_remote_uploads_base() . '/' . implode( '/', array_map( 'rawurlencode', $segments ) );
-   $response = wp_remote_get( $url, array( 'timeout' => 5, 'redirection' => 2 ) );
+   $response = wp_remote_get( $url, array(
+      'timeout'             => 5,
+      'redirection'         => 2,
+      'limit_response_size' => STUDIOSAMBAL_SVG_MAX_BYTES + 1,
+   ) );
    $body = is_wp_error( $response ) ? '' : wp_remote_retrieve_body( $response );
 
-   if ( 200 !== wp_remote_retrieve_response_code( $response ) || false === stripos( $body, '<svg' )
-      || ! wp_mkdir_p( dirname( $file ) ) || false === file_put_contents( $file, $body ) ) {
+   // Via een tijdelijk bestand, zodat een afgebroken schrijfactie geen half bestand achterlaat.
+   $temp = $file . '.' . bin2hex( random_bytes( 4 ) ) . '.tmp';
+   if ( 200 !== wp_remote_retrieve_response_code( $response ) || strlen( $body ) > STUDIOSAMBAL_SVG_MAX_BYTES
+      || ! studiosambal_env_is_svg_document( $body ) || ! wp_mkdir_p( dirname( $file ) )
+      || strlen( $body ) !== file_put_contents( $temp, $body ) || ! rename( $temp, $file ) ) {
+      if ( file_exists( $temp ) ) {
+         unlink( $temp );
+      }
       set_transient( $failed_key, 1, 10 * MINUTE_IN_SECONDS );
    }
 
    return $file;
+}
+
+/**
+* Is dit een SVG-document, en niet bijvoorbeeld een HTML-pagina met een
+* SVG-icoon erin? Het root-element moet <svg> zijn; ervoor mogen alleen een
+* BOM, XML-declaratie, doctype, commentaar en witruimte staan.
+*
+* @param string $body
+* @return bool
+*/
+function studiosambal_env_is_svg_document( $body )
+{
+   if ( ! is_string( $body ) ) {
+      return false;
+   }
+   $prolog = '/\A(?:\xEF\xBB\xBF)?(?:\s+|<\?xml\b[^>]*\?>|<!DOCTYPE\s+svg\b[^>]*>|<!--.*?-->)*/is';
+   $rest = preg_replace( $prolog, '', $body, 1 );
+   return is_string( $rest ) && 1 === preg_match( '/\A<svg[\s>\/]/i', $rest )
+      && 1 === preg_match( '/<\/svg>\s*\z/i', $rest );
 }
 
 function studiosambal_env_redirect_missing_upload()

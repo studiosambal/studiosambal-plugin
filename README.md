@@ -2,7 +2,7 @@
 
 WordPress-plugin met omgevingsgedrag op één plek:
 
-- **Niet-productie** (lokaal, staging, FlyWP-testdomeinen): zoekmachine-indexering geblokkeerd (robots.txt, meta robots, Rank Math, `X-Robots-Tag`).
+- **Niet-productie** (lokaal, staging, FlyWP-testdomeinen): zoekmachines ontmoedigd via robots.txt, meta robots, Rank Math en `X-Robots-Tag`. Dit is geen afscherming: statische bestanden en serverside caches die PHP overslaan vallen erbuiten. Echt afschermen doe je met toegangsbeveiliging op de server.
 - **Productie:** waarschuwing als "Zoekmachines ontmoedigen" aanstaat.
 - **Overal:** omgevingslabel in de adminbalk.
 - **Lokaal:** ontbrekende uploads komen van de externe omgeving. Gewone bestanden via een URL-rewrite of redirect, SVG's (die Bricks van schijf leest) worden één keer gedownload.
@@ -32,7 +32,8 @@ Sites zien nieuwe versies zoals elke andere plugin: in wp-admin onder Updates, e
 ## Nieuwe versie uitbrengen
 
 ```sh
-bin/test.sh               # tests (gebruikt WordPress-core van ~/Sites/stichtingkego, of WP_CORE_DIR)
+bin/test.sh               # unittests (gebruikt WordPress-core van ~/Sites/stichtingkego, of WP_CORE_DIR)
+bin/integration.sh        # installeren, loader, deactiveren, updatecheck op een lokale site (WP_SITE)
 bin/release.sh 3.3.1      # versie zetten, testen, commit, tag, push
 bin/zip.sh                # studiosambal-plugin.zip van de laatste tag, voor nieuwe installaties
 ```

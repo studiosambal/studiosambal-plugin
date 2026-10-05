@@ -295,10 +295,42 @@ try {
       apply_filters( 'get_attached_file', $fixture . '/2026/02/fout.svg', 3 );
       check( false, file_exists( $fixture . '/2026/02/fout.svg' ), '404 niet opgeslagen' );
       check( 1, $transients['studiosambal_svg_fail_3'] ?? null, '404 onthouden' );
-      $http_response = array( 'response' => array( 'code' => 200 ), 'body' => '<html>login</html>' );
+      // Een loginpagina met een SVG-icoon is geen SVG-document.
+      $http_response = array( 'response' => array( 'code' => 200 ), 'body' => '<!doctype html><html><body><svg></svg>Inloggen</body></html>' );
       apply_filters( 'get_attached_file', $fixture . '/2026/02/geen-svg.svg', 4 );
-      check( false, file_exists( $fixture . '/2026/02/geen-svg.svg' ), 'Geen SVG niet opgeslagen' );
+      check( false, file_exists( $fixture . '/2026/02/geen-svg.svg' ), 'HTML met SVG-icoon niet opgeslagen' );
       check( 3, count( $http_requests ), 'Requests voor fout en geen-svg' );
+      check( array(), glob( $fixture . '/2026/02/*.tmp' ), 'Geen tijdelijke bestanden achtergelaten' );
+      // Te groot: niet opslaan.
+      $attachments[7] = array( 'mime' => 'image/svg+xml', 'file' => 'groot.svg' );
+      $http_response = array( 'response' => array( 'code' => 200 ), 'body' => '<svg>' . str_repeat( ' ', STUDIOSAMBAL_SVG_MAX_BYTES ) . '</svg>' );
+      apply_filters( 'get_attached_file', $fixture . '/groot.svg', 7 );
+      check( false, file_exists( $fixture . '/groot.svg' ), 'Te grote SVG niet opgeslagen' );
+      foreach ( array(
+         array( '<svg xmlns="http://www.w3.org/2000/svg"></svg>', true ),
+         array( "\xEF\xBB\xBF<?xml version=\"1.0\"?>\n<!-- Illustrator -->\n<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"x\">\n<svg>\n</svg>\n", true ),
+         array( '<html><svg></svg></html>', false ),
+         array( '<svg></svg><script>x</script>', false ),
+         array( '<svg><g>', false ),
+         array( '<svgfoo></svgfoo>', false ),
+         array( '', false ),
+      ) as $case ) {
+         check( $case[1], studiosambal_env_is_svg_document( $case[0] ), 'SVG-document: ' . json_encode( $case[0] ) );
+      }
+
+      // Origineel ontbreekt, formaat bestaat lokaal: WordPress bouwt het formaat op de
+      // (al externe) URL van het origineel; het formaat moet toch lokaal blijven.
+      mkdir( $fixture . '/2026/05', 0777, true );
+      file_put_contents( $fixture . '/2026/05/foto-300x200.jpg', 'fixture' );
+      check( $remote . '/2026/05/foto.jpg', apply_filters( 'wp_get_attachment_url', $base . '/2026/05/foto.jpg' ), 'Origineel extern' );
+      check( array( $base . '/2026/05/foto-300x200.jpg', 300, 200, true ),
+         apply_filters( 'wp_get_attachment_image_src', array( $remote . '/2026/05/foto-300x200.jpg', 300, 200, true ) ), 'Lokaal formaat blijft lokaal' );
+      check( array( $remote . '/2026/05/foto-600x400.jpg', 600, 400, true ),
+         apply_filters( 'wp_get_attachment_image_src', array( $remote . '/2026/05/foto-600x400.jpg', 600, 400, true ) ), 'Ontbrekend formaat blijft extern' );
+      check( array( 300 => array( 'url' => $base . '/2026/05/foto-300x200.jpg' ), 600 => array( 'url' => $remote . '/2026/05/foto-600x400.jpg' ) ),
+         apply_filters( 'wp_calculate_image_srcset', array( 300 => array( 'url' => $remote . '/2026/05/foto-300x200.jpg' ), 600 => array( 'url' => $remote . '/2026/05/foto-600x400.jpg' ) ) ), 'Srcset per formaat' );
+      check( 'https://elders.example.org/wp-content/uploads/a.jpg', studiosambal_env_local_upload_url( 'https://elders.example.org/wp-content/uploads/a.jpg' ), 'Andere host niet lokaal gemaakt' );
+      check( $remote . 'x/a.jpg', studiosambal_env_local_upload_url( $remote . 'x/a.jpg' ), 'Alleen binnen de externe uploadmap' );
    } else {
       check( '', studiosambal_env_remote_uploads_base(), 'Invalid config disabled' );
       check( $base . '/missing.jpg', apply_filters( 'wp_get_attachment_url', $base . '/missing.jpg' ), 'No remote rewrite' );

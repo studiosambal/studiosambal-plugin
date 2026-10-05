@@ -34,13 +34,34 @@ require __DIR__ . '/src/omgeving.php';
 function studiosambal_install_mu_loader()
 {
    $target = WPMU_PLUGIN_DIR . '/studiosambal-loader.php';
-   if ( file_exists( $target ) || ! wp_mkdir_p( WPMU_PLUGIN_DIR ) ) {
-      return;
+   if ( is_file( $target ) ) {
+      return true;
    }
-   @copy( __DIR__ . '/mu-loader/studiosambal-loader.php', $target );
+   // @: anders een PHP-warning bij elke beheerpagina; de melding hieronder meldt het al.
+   return wp_mkdir_p( WPMU_PLUGIN_DIR )
+      && @copy( __DIR__ . '/mu-loader/studiosambal-loader.php', $target )
+      && is_file( $target );
 }
 register_activation_hook( __FILE__, 'studiosambal_install_mu_loader' );
 add_action( 'admin_init', 'studiosambal_install_mu_loader' );
+
+/**
+* Lukt het neerzetten niet (rechten), dan draait de plugin alleen zolang hij
+* actief is. Dat moet zichtbaar zijn in plaats van stil te mislukken.
+*/
+function studiosambal_mu_loader_notice()
+{
+   if ( ! current_user_can( 'activate_plugins' ) || is_file( WPMU_PLUGIN_DIR . '/studiosambal-loader.php' ) ) {
+      return;
+   }
+   printf(
+      '<div class="notice notice-error"><p><strong>Studio Sambal:</strong> %s <code>%s</code> → <code>%s</code></p></div>',
+      esc_html( 'De mu-loader kon niet worden geplaatst, dus de plugin stopt als hij gedeactiveerd wordt. Kopieer hem handmatig:' ),
+      esc_html( 'wp-content/plugins/studiosambal-plugin/mu-loader/studiosambal-loader.php' ),
+      esc_html( 'wp-content/mu-plugins/' )
+   );
+}
+add_action( 'admin_notices', 'studiosambal_mu_loader_notice' );
 
 // Updates via GitHub-tags, zichtbaar in wp-admin en via `wp plugin update studiosambal-plugin`.
 require_once __DIR__ . '/vendor/yahnis-elsts/plugin-update-checker/plugin-update-checker.php';
