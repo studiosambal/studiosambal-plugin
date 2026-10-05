@@ -3,7 +3,7 @@
 * Plugin Name: Studio Sambal
 * Plugin URI: https://github.com/studiosambal/studiosambal-plugin
 * Description: Omgevingsgedrag op één plek. Niet-productie: zoekmachine-indexering geblokkeerd. Productie: waarschuwing als zoekmachines ontmoedigd worden. Overal: omgevingslabel in de adminbalk. Lokaal: ontbrekende uploads (ook SVG's die Bricks van schijf leest) worden van de externe omgeving geladen. Wordt via een mu-loader altijd geladen, ook als hij gedeactiveerd is.
-* Version: 3.3.0
+* Version: 3.3.1
 * Requires PHP: 7.4
 * Author: Studio Sambal
 * Author URI: https://studiosambal.nl
@@ -23,7 +23,7 @@ defined( 'ABSPATH' ) || exit;
 if ( defined( 'STUDIOSAMBAL_PLUGIN_VERSION' ) ) {
    return;
 }
-define( 'STUDIOSAMBAL_PLUGIN_VERSION', '3.3.0' );
+define( 'STUDIOSAMBAL_PLUGIN_VERSION', '3.3.1' );
 
 require __DIR__ . '/src/omgeving.php';
 
