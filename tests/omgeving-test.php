@@ -54,6 +54,7 @@ function __return_zero() {
 // Fixtures voor SVG-bijlagen: mime-type, metadata, transients en HTTP.
 define( 'MINUTE_IN_SECONDS', 60 );
 $attachments = array();
+$upload_dir = array( 'baseurl' => 'https://example.org/wp-content/uploads', 'basedir' => sys_get_temp_dir() );
 $transients = array();
 $http_requests = array();
 $http_response = null;
@@ -151,7 +152,8 @@ foreach ( array(
    check( $blocked ? 0 : false, apply_filters( 'pre_option_blog_public', false ), 'Runtime privacy' );
    check( 'local' === $expected && 'valid' === $mode, false !== has_filter( 'wp_get_attachment_url' ), 'Upload hooks' );
    if ( $blocked ) {
-      check( "User-agent: *\nDisallow:\n", apply_filters( 'robots_txt', "User-agent: *\nDisallow: /\n" ), 'robots.txt laat crawlen toe (noindex leesbaar)' );
+      check( "User-agent: Googlebot\nUser-agent: Bingbot\nUser-agent: Applebot\nUser-agent: DuckDuckBot\nDisallow: /wp-content/uploads/\n\nUser-agent: *\nDisallow: /\n",
+         apply_filters( 'robots_txt', "User-agent: *\nDisallow: /\n" ), 'robots.txt: zoekmachines lezen noindex, geen uploads, rest niets' );
       check( array( 'noindex' => true, 'nofollow' => true, 'nosnippet' => true, 'noarchive' => true ),
          apply_filters( 'wp_robots', array( 'index' => true, 'follow' => true, 'max-image-preview' => 'large' ) ), 'Core robots' );
       $robots = apply_filters( 'rank_math/frontend/robots', array( 'index' => 'index', 'follow' => 'follow' ) );
@@ -197,6 +199,9 @@ add_filter( 'studiosambal_blocked_domains', function ( $domains ) {
 } );
 do_action( 'init' );
 check( 'staging', studiosambal_env_type(), 'Late domain filter' );
+$upload_dir = array( 'baseurl' => 'https://preview.example.org/app/uploads', 'basedir' => sys_get_temp_dir() );
+check( true, false !== strpos( studiosambal_env_robots_txt(), "Disallow: /app/uploads/\n" ), 'robots.txt volgt afwijkende uploadmap' );
+$upload_dir = array( 'baseurl' => 'https://example.org/wp-content/uploads', 'basedir' => sys_get_temp_dir() );
 check( true, false !== has_filter( 'wp_robots' ), 'Late domain filter activates protection' );
 
 reset_environment( 'local', 'example.test', 'https://example.test' );

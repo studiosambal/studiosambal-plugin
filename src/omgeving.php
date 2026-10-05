@@ -111,16 +111,32 @@ function studiosambal_env_type()
  * ------------------------------------------------------------------------- */
 
 /**
-* Crawlen toestaan, zodat zoekmachines de noindex (meta en X-Robots-Tag) kunnen
-* lezen. Met 'Disallow: /' zien ze die niet en kan een gelinkte URL alsnog in
-* de resultaten komen. WordPress zelf zet 'Disallow: /' zodra blog_public 0 is,
-* daarom wordt de hele robots.txt vervangen.
+* Zoekmachines mogen pagina's crawlen, zodat ze de noindex (meta en
+* X-Robots-Tag) lezen; met 'Disallow: /' zien ze die niet en kan een gelinkte
+* URL alsnog in de resultaten komen. Uploads krijgen geen noindex-header (de
+* server levert ze zonder PHP), dus die zijn voor zoekmachines verboden terrein.
+* Alle andere bots (AI-crawlers, SEO-tools) mogen niets.
+* WordPress zet zelf 'Disallow: /' zodra blog_public 0 is, daarom wordt de
+* hele robots.txt vervangen.
 *
 * @return string
 */
 function studiosambal_env_robots_txt()
 {
-   return "User-agent: *\nDisallow:\n";
+   $uploads = wp_parse_url( wp_get_upload_dir()['baseurl'] ?? '', PHP_URL_PATH );
+   $uploads = '/' . trim( is_string( $uploads ) && '' !== trim( $uploads, '/' ) ? $uploads : 'wp-content/uploads', '/' ) . '/';
+   $search_engines = (array) apply_filters( 'studiosambal_robots_search_engines', array(
+      'Googlebot',
+      'Bingbot',
+      'Applebot',
+      'DuckDuckBot',
+   ) );
+
+   $robots = '';
+   foreach ( $search_engines as $agent ) {
+      $robots .= 'User-agent: ' . $agent . "\n";
+   }
+   return $robots . 'Disallow: ' . $uploads . "\n\nUser-agent: *\nDisallow: /\n";
 }
 
 /**

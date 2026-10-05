@@ -2,7 +2,7 @@
 
 WordPress-plugin met omgevingsgedrag op één plek:
 
-- **Niet-productie** (lokaal, staging, FlyWP-testdomeinen): `noindex` via meta robots, Rank Math en de `X-Robots-Tag`-header. robots.txt staat crawlen bewust toe, anders kan Google die `noindex` niet lezen. Dit is geen afscherming: statische bestanden en serverside caches die PHP overslaan vallen erbuiten. Echt afschermen doe je met toegangsbeveiliging op de server.
+- **Niet-productie** (lokaal, staging, FlyWP-testdomeinen): `noindex` via meta robots, Rank Math en de `X-Robots-Tag`-header. In robots.txt mogen zoekmachines (Google, Bing, Apple, DuckDuckGo) de pagina's crawlen, anders kunnen ze die `noindex` niet lezen. De uploadmap is voor hen verboden, want die bestanden krijgen geen header. Alle andere bots, zoals AI-crawlers en SEO-tools, mogen niets. Lijst aanpassen: filter `studiosambal_robots_search_engines`. Dit is geen afscherming: statische bestanden en serverside caches die PHP overslaan vallen erbuiten. Echt afschermen doe je met toegangsbeveiliging op de server.
 - **Productie:** waarschuwing als "Zoekmachines ontmoedigen" aanstaat.
 - **Adminbalk:** label met de omgeving (Lokaal, Staging, Development). Productie krijgt geen label, behalve een rode waarschuwing als "Zoekmachines ontmoedigen" aanstaat.
 - **Lokaal:** ontbrekende uploads komen van de externe omgeving. Gewone bestanden via een URL-rewrite of redirect, SVG's (die Bricks van schijf leest) worden één keer gedownload.
