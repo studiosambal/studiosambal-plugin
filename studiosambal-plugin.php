@@ -3,7 +3,7 @@
 * Plugin Name: Studio Sambal
 * Plugin URI: https://github.com/studiosambal/studiosambal-plugin
 * Description: De Studio Sambal-plugin voor de sites die wij bouwen en beheren. Houdt test- en lokale omgevingen uit Google, laat in de adminbalk zien als je níet op de live site werkt en haalt lokaal ontbrekende afbeeldingen van de live site.
-* Version: 3.3.3
+* Version: 3.3.4
 * Requires PHP: 7.4
 * Author: Studio Sambal
 * Author URI: https://studiosambal.nl
@@ -23,7 +23,7 @@ defined( 'ABSPATH' ) || exit;
 if ( defined( 'STUDIOSAMBAL_PLUGIN_VERSION' ) ) {
    return;
 }
-define( 'STUDIOSAMBAL_PLUGIN_VERSION', '3.3.3' );
+define( 'STUDIOSAMBAL_PLUGIN_VERSION', '3.3.4' );
 
 require __DIR__ . '/src/omgeving.php';
 
