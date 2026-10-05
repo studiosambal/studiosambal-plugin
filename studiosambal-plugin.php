@@ -27,6 +27,21 @@ define( 'STUDIOSAMBAL_PLUGIN_VERSION', '3.3.0' );
 
 require __DIR__ . '/src/omgeving.php';
 
+/**
+* Zet de mu-loader neer als hij ontbreekt, zodat de plugin ook gedeactiveerd
+* blijft draaien. Zo volstaat een gewone installatie (wp-admin, WP Umbrella).
+*/
+function studiosambal_install_mu_loader()
+{
+   $target = WPMU_PLUGIN_DIR . '/studiosambal-loader.php';
+   if ( file_exists( $target ) || ! wp_mkdir_p( WPMU_PLUGIN_DIR ) ) {
+      return;
+   }
+   @copy( __DIR__ . '/mu-loader/studiosambal-loader.php', $target );
+}
+register_activation_hook( __FILE__, 'studiosambal_install_mu_loader' );
+add_action( 'admin_init', 'studiosambal_install_mu_loader' );
+
 // Updates via GitHub-tags, zichtbaar in wp-admin en via `wp plugin update studiosambal-plugin`.
 require_once __DIR__ . '/vendor/yahnis-elsts/plugin-update-checker/plugin-update-checker.php';
 YahnisElsts\PluginUpdateChecker\v5\PucFactory::buildUpdateChecker(

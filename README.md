@@ -9,19 +9,11 @@ WordPress-plugin met omgevingsgedrag op één plek:
 
 ## Installeren op een site
 
-```sh
-cd wp-content/plugins
-git clone --depth 1 https://github.com/studiosambal/studiosambal-plugin.git
-rm -rf studiosambal-plugin/.git
-cp studiosambal-plugin/mu-loader/studiosambal-loader.php ../mu-plugins/
-wp plugin activate studiosambal-plugin
-```
-
-De map moet `studiosambal-plugin` heten. De zips van GitHub hebben een andere mapnaam; hernoem die eerst als je via een zip installeert.
-
-De **mu-loader** zorgt dat de plugin altijd draait, ook als iemand hem deactiveert. Hij verandert nooit, dus je hoeft hem maar één keer te plaatsen. Activeren is niet nodig, maar wel netjes; dubbel laden wordt afgevangen.
+Upload `studiosambal-plugin.zip` (van de laatste release, zie hieronder) via Plugins → Nieuwe plugin, of in bulk via WP Umbrella, en activeer hem. Bij activeren zet de plugin zelf `mu-plugins/studiosambal-loader.php` neer. Die loader zorgt dat de plugin altijd draait, ook als iemand hem deactiveert, en verandert nooit.
 
 Een oude mu-plugin `mu-plugins/studiosambal-plugin.php` verwijder je bij de overstap.
+
+De map moet `studiosambal-plugin` heten; de standaard-zips van GitHub hebben een andere mapnaam, gebruik daarom `bin/zip.sh`.
 
 ## Instellingen (wp-config.php, optioneel)
 
@@ -42,4 +34,5 @@ Sites zien nieuwe versies zoals elke andere plugin: in wp-admin onder Updates, e
 ```sh
 bin/test.sh               # tests (gebruikt WordPress-core van ~/Sites/stichtingkego, of WP_CORE_DIR)
 bin/release.sh 3.3.1      # versie zetten, testen, commit, tag, push
+bin/zip.sh                # studiosambal-plugin.zip van de laatste tag, voor nieuwe installaties
 ```
